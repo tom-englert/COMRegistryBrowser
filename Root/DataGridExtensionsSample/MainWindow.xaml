@@ -1,0 +1,64 @@
+﻿<Window x:Class="DataGridExtensionsSample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:src="clr-namespace:DataGridExtensionsSample"
+        xmlns:dgx="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
+        Title="DataGrid dgx sample">
+  <Window.Resources>
+    <ResourceDictionary>
+      <!-- We need to include the styles to use them -->
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/DataGridExtensions;component/Styles.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Template for a simple integer dgx control. -->
+      <ControlTemplate x:Key="IntegerFilter">
+        <src:IntegerGreatherThanFilterControl Filter="{Binding Path=Filter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}"/>
+      </ControlTemplate>
+
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+
+    <!-- The left grid shows how to customize the filters when using auto generated columns. 
+        See the DataGrid_AutoGeneratingColumn event handler for details. 
+        Overrides the content filter factory to use the regex matching instead of the default simple "string contains" matching.
+    -->    
+    <DataGrid ItemsSource="{Binding Items}" 
+              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
+              AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+              dgx:DataGridFilter.ContentFilterFactory="{StaticResource RegexContentFilterFactory}"
+              />
+
+    <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
+    
+    <!-- The right grid shows how to customize the filters in XAML when using explicit generated columns. -->
+    
+    <DataGrid ItemsSource="{Binding Items}" Grid.Column="2"
+              AutoGenerateColumns="False"
+              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
+              >
+      <DataGrid.Columns>
+        <!-- Use a check box column for the boolean property "Flag" but override the column data type to use the default text dgx. -->
+        <DataGridCheckBoxColumn Header="Bool/Text" Binding="{Binding Flag, Mode=OneWay}" dgx:DataGridFilterColumn.Template="{StaticResource {x:Type DataGridTextColumn}}"/>
+        <!-- Use the second integer dgx for the integer column. -->
+        <DataGridTextColumn Header="Integer/Custom" Binding="{Binding Index, Mode=OneWay}" dgx:DataGridFilterColumn.Template="{StaticResource IntegerFilter}"/>
+        <!-- Hide the dgx for this column. -->
+        <DataGridTextColumn Header="Text/No Filter" Binding="{Binding Column1, Mode=OneWay}" dgx:DataGridFilterColumn.IsFilterVisible="False"/>
+        <!-- Use the default dgx for this column. -->
+        <DataGridTextColumn Header="Text/Text" Binding="{Binding Column2, Mode=OneWay}"/>
+        <!-- Use the default dgx for this column. -->
+        <DataGridTextColumn Header="Double/Text" Binding="{Binding Probability, Mode=OneWay}"/>
+      </DataGrid.Columns>
+    </DataGrid>
+
+  </Grid>
+</Window>
