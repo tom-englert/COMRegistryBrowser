@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:src="clr-namespace:ComBrowser"
+        xmlns:win32="clr-namespace:Microsoft.Win32;assembly=mscorlib"
         Title="MainWindow" Height="350" Width="525"
         TextOptions.TextFormattingMode="Display"
         >
@@ -14,7 +15,7 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/DataGridExtensions;component/Styles.xaml"/>
       </ResourceDictionary.MergedDictionaries>
-      
+
       <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
       <ContextMenu x:Key="ServersContextMenu">
@@ -39,95 +40,96 @@
   </Window.Resources>
 
   <Grid>
-    <TabControl>
-      <TabItem Header="Servers">
-        <Grid DataContext="{Binding Path=ServerCollection}">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-          </Grid.ColumnDefinitions>
-          <DataGrid x:Name="serversGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" 
+    <Grid>
+      <TabControl>
+        <TabItem Header="Servers">
+          <Grid DataContext="{Binding Path=ServerCollection}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="2*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DataGrid x:Name="serversGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" 
                     ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}" ContextMenu="{StaticResource ServersContextMenu}"/>
-          <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
-          <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-              <RowDefinition/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition/>
-            </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0">
-              <TextBlock DockPanel.Dock="Top" Margin="4" Text="Interfaces marshalled by the selected server:"/>
-              <DataGrid ItemsSource="{Binding Path=InterfaceCollection.ItemsView}"/>
-            </DockPanel>
-            <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-            <DockPanel Grid.Row="2">
-              <TextBlock DockPanel.Dock="Top" Margin="4" Text="Type libraries contained in the selected server:"/>
-              <DataGrid ItemsSource="{Binding Path=TypeLibraryCollection.ItemsView}"/>
-            </DockPanel>
+            <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
+            <Grid Grid.Column="2">
+              <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <DockPanel Grid.Row="0">
+                <TextBlock DockPanel.Dock="Top" Margin="4" Text="Interfaces marshalled by the selected server:"/>
+                <DataGrid ItemsSource="{Binding Path=InterfaceCollection.ItemsView}"/>
+              </DockPanel>
+              <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+              <DockPanel Grid.Row="2">
+                <TextBlock DockPanel.Dock="Top" Margin="4" Text="Type libraries contained in the selected server:"/>
+                <DataGrid ItemsSource="{Binding Path=TypeLibraryCollection.ItemsView}"/>
+              </DockPanel>
+            </Grid>
           </Grid>
-        </Grid>
-      </TabItem>
+        </TabItem>
 
-      <TabItem Header="Interfaces">
-        <Grid DataContext="{Binding Path=InterfaceCollection}">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-          </Grid.ColumnDefinitions>
-          <DataGrid x:Name="interfacesGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}"
+        <TabItem Header="Interfaces">
+          <Grid DataContext="{Binding Path=InterfaceCollection}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="2*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DataGrid x:Name="interfacesGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}"
                     ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}" />
-          <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
-          <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-              <RowDefinition/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition/>
-            </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0">
-              <TextBlock DockPanel.Dock="Top" Margin="4" Text="Servers marshalling the selected interface:"/>
-              <DataGrid ItemsSource="{Binding Path=ServerCollection.ItemsView}" ContextMenu="{StaticResource ServersContextMenu}"/>
-            </DockPanel>
-            <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-            <DockPanel Grid.Row="2">
-              <TextBlock DockPanel.Dock="Top" Margin="4" Text="Type libraries defining the selected interface:"/>
-              <DataGrid ItemsSource="{Binding Path=TypeLibraryCollection.ItemsView}"/>
-            </DockPanel>
+            <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
+            <Grid Grid.Column="2">
+              <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <DockPanel Grid.Row="0">
+                <TextBlock DockPanel.Dock="Top" Margin="4" Text="Servers marshalling the selected interface:"/>
+                <DataGrid ItemsSource="{Binding Path=ServerCollection.ItemsView}" ContextMenu="{StaticResource ServersContextMenu}"/>
+              </DockPanel>
+              <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+              <DockPanel Grid.Row="2">
+                <TextBlock DockPanel.Dock="Top" Margin="4" Text="Type libraries defining the selected interface:"/>
+                <DataGrid ItemsSource="{Binding Path=TypeLibraryCollection.ItemsView}"/>
+              </DockPanel>
+            </Grid>
           </Grid>
-        </Grid>
-      </TabItem>
+        </TabItem>
 
-      <TabItem Header="Type Libraries">
-        <Grid DataContext="{Binding Path=TypeLibraryCollection}">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-          </Grid.ColumnDefinitions>
-          <DataGrid x:Name="typeLibsGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" 
+        <TabItem Header="Type Libraries">
+          <Grid DataContext="{Binding Path=TypeLibraryCollection}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="2*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DataGrid x:Name="typeLibsGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" 
                     ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"/>
-          <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
-          <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-              <RowDefinition/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition/>
-            </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0">
-              <TextBlock DockPanel.Dock="Top" Margin="4" Text="Servers containing the selected type library:"/>
-              <DataGrid ItemsSource="{Binding Path=ServerCollection.ItemsView}" ContextMenu="{StaticResource ServersContextMenu}"/>
-            </DockPanel>
-            <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-            <DockPanel Grid.Row="2">
-              <TextBlock DockPanel.Dock="Top" Margin="4" Text="Interfaces contained in the selected type library:"/>
-              <DataGrid ItemsSource="{Binding Path=InterfaceCollection.ItemsView}"/>
-            </DockPanel>
+            <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
+            <Grid Grid.Column="2">
+              <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <DockPanel Grid.Row="0">
+                <TextBlock DockPanel.Dock="Top" Margin="4" Text="Servers containing the selected type library:"/>
+                <DataGrid ItemsSource="{Binding Path=ServerCollection.ItemsView}" ContextMenu="{StaticResource ServersContextMenu}"/>
+              </DockPanel>
+              <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+              <DockPanel Grid.Row="2">
+                <TextBlock DockPanel.Dock="Top" Margin="4" Text="Interfaces contained in the selected type library:"/>
+                <DataGrid ItemsSource="{Binding Path=InterfaceCollection.ItemsView}"/>
+              </DockPanel>
+            </Grid>
           </Grid>
-        </Grid>
-      </TabItem>
-    </TabControl>
-    <TextBlock Text="Loading ..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="56" FontWeight="Bold">
+        </TabItem>
+      </TabControl>
+      <TextBlock Text="Loading ..." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="56" FontWeight="Bold">
       <TextBlock.Style>
         <Style TargetType="TextBlock">
           <Style.Triggers>
@@ -137,6 +139,15 @@
           </Style.Triggers>
         </Style>
       </TextBlock.Style>
-    </TextBlock>
+      </TextBlock>
+    </Grid>
+    <Grid VerticalAlignment="Top" HorizontalAlignment="Right">
+      <StackPanel Orientation="Horizontal">
+        <ComboBox SelectedItem="{Binding RegistryView, Mode=TwoWay}">
+          <x:StaticExtension Member="win32:RegistryView.Registry32"/>
+          <x:StaticExtension Member="win32:RegistryView.Registry64"/>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
   </Grid>
 </Window>
