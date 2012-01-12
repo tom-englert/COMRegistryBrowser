@@ -88,7 +88,6 @@
     <Compile Include="InterfaceCollection.cs" />
     <Compile Include="ItemsCollection.cs" />
     <Compile Include="PathExtensions.cs" />
-    <Compile Include="Registry.cs" />
     <Compile Include="RegistryEntry.cs" />
     <Compile Include="RegistryExtensions.cs" />
     <Compile Include="Server.cs" />

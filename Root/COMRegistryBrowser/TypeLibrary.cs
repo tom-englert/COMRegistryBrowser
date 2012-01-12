@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Win32;
 using System.IO;
+using Microsoft.Win32;
 
 namespace ComBrowser
 {
@@ -39,7 +37,8 @@ namespace ComBrowser
         {
             using (var typeLibKey = parentKey.OpenSubKey(guid))
             {
-                foreach (var versionName in typeLibKey.GetSubKeyNames())
+                var subKeyNames = typeLibKey.GetSubKeyNames();
+                foreach (var versionName in subKeyNames)
                 {
                     using (var versionKey = typeLibKey.OpenSubKey(versionName))
                     {

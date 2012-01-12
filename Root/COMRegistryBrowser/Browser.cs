@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Joins;
-using System.Text;
 using System.Threading;
 using System.Windows;
-using System.Windows.Data;
 using Microsoft.Win32;
 
 namespace ComBrowser
@@ -16,6 +10,8 @@ namespace ComBrowser
     internal sealed class Browser : DependencyObject, INotifyPropertyChanged
     {
         private int numberOfLoadingThreads;
+        private RegistryView registryView = RegistryView.Registry32;
+
 
         public Browser()
         {
@@ -38,14 +34,14 @@ namespace ComBrowser
                     Interface[] interfaces;
                     TypeLibrary[] typeLibraries;
 
-                    using (var classesRootKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Default))
+                    using (var classesRootKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, registryView))
                     {
                         using (var clsidKey = classesRootKey.OpenSubKey("CLSID"))
                         {
                             servers = clsidKey.GetSubKeyNames()
                                 //.AsParallel()
                                 .Select(guid => new Server(clsidKey, guid))
-                                .Take(20)
+                                //.Take(20)
                                 .ToArray();
                         }
 
@@ -54,7 +50,7 @@ namespace ComBrowser
                             typeLibraries = typeLibKey.GetSubKeyNames()
                                 //.AsParallel()
                                 .SelectMany(guid => TypeLibrary.GetTypeLibrarys(typeLibKey, guid))
-                                .Take(20)
+                                //.Take(20)
                                 .ToArray();
                         }
 
@@ -65,7 +61,7 @@ namespace ComBrowser
                             interfaces = interfaceKey.GetSubKeyNames()
                                 //.AsParallel()
                                 .Select(guid => new Interface(interfaceKey, guid, tlbLookup))
-                                .Take(20)
+                                //.Take(20)
                                 .ToArray();
                         }
                     }
@@ -95,7 +91,6 @@ namespace ComBrowser
             DependencyProperty.Register("ServerCollection", typeof(ServerCollection), typeof(Browser));
 
 
-
         public InterfaceCollection InterfaceCollection
         {
             get { return (InterfaceCollection)GetValue(InterfaceCollectionProperty); }
@@ -106,7 +101,6 @@ namespace ComBrowser
         /// </summary>
         public static readonly DependencyProperty InterfaceCollectionProperty =
             DependencyProperty.Register("InterfaceCollection", typeof(InterfaceCollection), typeof(Browser));
-
 
 
         public TypeLibraryCollection TypeLibraryCollection
@@ -121,7 +115,6 @@ namespace ComBrowser
             DependencyProperty.Register("TypeLibraryCollection", typeof(TypeLibraryCollection), typeof(Browser));
 
 
-
         public bool IsLoading
         {
             get { return (bool)GetValue(IsLoadingProperty); }
@@ -133,6 +126,23 @@ namespace ComBrowser
         public static readonly DependencyProperty IsLoadingProperty =
             DependencyProperty.Register("IsLoading", typeof(bool), typeof(Browser));
 
+
+        public RegistryView RegistryView
+        {
+            get
+            {
+                return registryView;
+            }
+            set
+            {
+                if (registryView != value)
+                {
+                    registryView = value;
+                    OnPropertyChanged("RegistryView");
+                    BeginRefresh();
+                }
+            }
+        }
 
         #region INotifyPropertyChanged Members
 

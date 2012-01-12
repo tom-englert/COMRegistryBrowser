@@ -1,13 +1,11 @@
-﻿using System.Windows;
-using System.ComponentModel;
-using System.Windows.Controls.Primitives;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
-using System.Reflection;
-using System;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Text.RegularExpressions;
 
 namespace DataGridExtensions
 {
@@ -18,6 +16,7 @@ namespace DataGridExtensions
     public sealed class DataGridFilterColumnControl : Control, INotifyPropertyChanged
     {
         private static BooleanToVisibilityConverter BooleanToVisibilityConverter = new BooleanToVisibilityConverter();
+        private static ControlTemplate EmptyControlTemplate = new ControlTemplate();
 
         /// <summary>
         /// The column header of the column we are filtering. This control must be a child element of the column header.
@@ -32,6 +31,11 @@ namespace DataGridExtensions
         /// </summary>
         private IContentFilter activeFilter;
 
+        static DataGridFilterColumnControl()
+        {
+            var templatePropertyDescriptor = DependencyPropertyDescriptor.FromProperty(TemplateProperty, typeof(Control));
+            templatePropertyDescriptor.DesignerCoerceValueCallback = Template_CoerceValue;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataGridFilterColumnControl"/> class.
@@ -46,18 +50,24 @@ namespace DataGridExtensions
 
         void self_Loaded(object sender, RoutedEventArgs e)
         {
-            // Find the ancestor column header and data grid controls.
-            columnHeader = this.FindAncestorOrSelf<DataGridColumnHeader>();
-            if (columnHeader == null)
-                throw new InvalidOperationException("DataGridFilterColumnControl must be a child element of a DataGridColumnHeader.");
+            if (filterHost == null)
+            {
+                // Find the ancestor column header and data grid controls.
+                columnHeader = this.FindAncestorOrSelf<DataGridColumnHeader>();
+                if (columnHeader == null)
+                    throw new InvalidOperationException("DataGridFilterColumnControl must be a child element of a DataGridColumnHeader.");
 
-            var dataGrid = columnHeader.FindAncestorOrSelf<DataGrid>();
-            if (dataGrid == null)
-                throw new InvalidOperationException("DataGridColumnHeader must be a child element of a DataGrid");
+                var dataGrid = columnHeader.FindAncestorOrSelf<DataGrid>();
+                if (dataGrid == null)
+                    throw new InvalidOperationException("DataGridColumnHeader must be a child element of a DataGrid");
 
-            // Must set an empty template here, so we reliably get the "OnTemplateChanged" also when the columns attached property is null 
-            // - otherwise we won't be able to assing the default templates.
-            Template = new ControlTemplate();
+                // Find our host and attach oursef.
+                filterHost = dataGrid.GetFilter();
+                filterHost.AddColumn(this);
+            }
+
+            // Must set a non-null empty template here, else we won't get the coerce value callback when the columns attached property is null!
+            Template = EmptyControlTemplate;
 
             // Load our IsFilterVisible and Template properties from the corresponding properties attached to the
             // DataGridColumnHeader.Column property. Use binding since columnHeader.Column is still null at this point.
@@ -66,10 +76,6 @@ namespace DataGridExtensions
 
             var templatePropertyPath = new PropertyPath("Column.(0)", DataGridFilterColumn.TemplateProperty);
             BindingOperations.SetBinding(this, TemplateProperty, new Binding() { Path = templatePropertyPath, Source = columnHeader, Mode = BindingMode.OneWay });
-
-            // Find our host and attach oursef.
-            filterHost = dataGrid.GetFilter();
-            filterHost.AddColumn(this);
         }
 
         void self_Unloaded(object sender, RoutedEventArgs e)
@@ -109,15 +115,24 @@ namespace DataGridExtensions
 
         #endregion
 
-        protected override void OnTemplateChanged(ControlTemplate oldTemplate, ControlTemplate newTemplate)
+        private static object Template_CoerceValue(DependencyObject sender, object baseValue)
         {
-            base.OnTemplateChanged(oldTemplate, newTemplate);
-
-            // Try to find a default template if no explict template is set.
-            if ((newTemplate == null) && (columnHeader.Column != null))
+            if (baseValue == null)
             {
-                Template = this.TryFindResource(columnHeader.Column.GetType()) as ControlTemplate;
+                var control = sender as DataGridFilterColumnControl;
+                if (control != null)
+                {
+                    // Just resolved the binding to the template property attached to the column, and the value has not been set on the column:
+                    // => try to find the default template based on the columns type.
+                    var column = control.columnHeader.Column;
+                    if (column != null)
+                    {
+                        return control.TryFindResource(column.GetType()) as ControlTemplate;
+                    }
+                }
             }
+
+            return baseValue;
         }
 
         /// <summary>
