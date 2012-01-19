@@ -32,13 +32,6 @@ namespace DataGridExtensionsSample
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            var header = e.Column.Header;
-
-            if (header != null)
-            {
-                e.Column.Header = new ContentControl() { Template = (ControlTemplate)FindResource("FilteredGridColumnHeaderFilterHostTemplate"), Content = header, HorizontalAlignment= HorizontalAlignment.Stretch };
-            }
-
             // Use the integer filter for the integer column.
             if (e.PropertyType == typeof(int))
             {
