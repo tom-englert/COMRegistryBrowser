@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace DataGridExtensions
 {
@@ -12,6 +9,33 @@ namespace DataGridExtensions
     /// </summary>
     public static class DataGridFilter
     {
+        #region IsFilterEnabled attached property
+
+        public static bool GetIsFilterEnabled(DataGrid obj)
+        {
+            return (bool)obj.GetValue(IsFilterEnabledProperty);
+        }
+        public static void SetIsFilterEnabled(DataGrid obj, bool value)
+        {
+            obj.SetValue(IsFilterEnabledProperty, value);
+        }
+        /// <summary>
+        /// Identifies the IsFilterEnabled dependency property
+        /// </summary>
+        public static readonly DependencyProperty IsFilterEnabledProperty =
+            DependencyProperty.RegisterAttached("IsFilterEnabled", typeof(bool), typeof(DataGridFilter), new UIPropertyMetadata(false, IsFilterEnabled_Changed));
+
+        private static void IsFilterEnabled_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (dataGrid != null)
+            {
+                dataGrid.GetFilter();
+            }
+        }
+
+        #endregion
+
         #region Filter attached property
 
         /// <summary>

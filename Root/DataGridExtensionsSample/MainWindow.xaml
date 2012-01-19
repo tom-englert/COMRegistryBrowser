@@ -38,6 +38,7 @@
     <DataGrid ItemsSource="{Binding Items}" 
               AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
               dgx:DataGridFilter.ContentFilterFactory="{StaticResource RegexContentFilterFactory}"
+              dgx:DataGridFilter.IsFilterEnabled="True"
               >
       <DataGrid.ColumnHeaderStyle>
         <Style TargetType="DataGridColumnHeader">
@@ -48,11 +49,13 @@
 
     <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
     
-    <!-- The right grid shows how to customize the filters in XAML when using explicit generated columns. -->
+    <!-- The right grid shows how to customize the filters in XAML when using explicit generated columns. 
+              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
+    -->
     
     <DataGrid ItemsSource="{Binding Items}" Grid.Column="2"
               AutoGenerateColumns="False"
-              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
+              dgx:DataGridFilter.IsFilterEnabled="True"
               >
       <DataGrid.Columns>
         <!-- Use a check box column for the boolean property "Flag" but override the column data type to use the default text dgx. -->

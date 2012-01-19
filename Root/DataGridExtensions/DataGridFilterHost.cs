@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using System.Windows.Controls;
-using System.Reflection;
-using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Threading;
-using System.Windows.Media;
 
 namespace DataGridExtensions
 {
@@ -43,6 +39,21 @@ namespace DataGridExtensions
 
             this.dataGrid = dataGrid;
             this.deferFilterEvaluationTimer = new DispatcherTimer(TimeSpan.FromSeconds(0.3), DispatcherPriority.Input, (_, __) => EvaluateFilter(), Dispatcher.CurrentDispatcher);
+            this.dataGrid.Columns.CollectionChanged += Columns_CollectionChanged;
+        }
+
+        private void Columns_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if ((e != null) && (e.NewItems != null))
+            {
+                foreach (DataGridColumn column in e.NewItems)
+                {
+                    if (column.GetIsFilterVisible())
+                    {
+                        column.HeaderTemplate = (DataTemplate)dataGrid.FindResource("FilteredGridColumnHeaderFilterHostTemplate");
+                    }
+                }
+            }
         }
 
         /// <summary>
