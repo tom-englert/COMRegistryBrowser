@@ -82,6 +82,16 @@
   <Style x:Key="Test" TargetType="Control">
     <Setter Property="Background" Value="Transparent"/>
   </Style>
+  
+  <ControlTemplate x:Key="FilteredGridColumnHeaderFilterHostTemplate" TargetType="ContentControl">
+    <DockPanel>
+      <!-- The control to host the filter UI for this column -->
+      <src:DataGridFilterColumnControl DockPanel.Dock="Right"/>
+      <ContentPresenter HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridColumnHeader}}" 
+                        SnapsToDevicePixels="{Binding SnapsToDevicePixels, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridColumnHeader}}" 
+                        VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGridColumnHeader}}"/>
+    </DockPanel>
+  </ControlTemplate>
 
   <!-- Style to use for the column headers in a DataGrid to add filtering capabilities. 
       This is mainly a copy of the original ColumnHeader style with a few extensions. -->

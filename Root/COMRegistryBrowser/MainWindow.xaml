@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:src="clr-namespace:ComBrowser"
+        xmlns:dge="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
         xmlns:win32="clr-namespace:Microsoft.Win32;assembly=mscorlib"
         Title="MainWindow" Height="350" Width="525"
         TextOptions.TextFormattingMode="Display"
@@ -32,6 +33,7 @@
         <Setter Property="AlternatingRowBackground" Value="LightGreen"/>
         <Setter Property="HorizontalGridLinesBrush" Value="LightGray"/>
         <Setter Property="VerticalGridLinesBrush" Value="LightGray"/>
+        <Setter Property="dge:DataGridFilter.ContentFilterFactory" Value="{StaticResource RegexContentFilterFactory}"/>
         <EventSetter Event="Loaded" Handler="DataGrid_Loaded"/>
         <EventSetter Event="MouseDoubleClick" Handler="DataGrid_MouseDoubleClick"/>
       </Style>

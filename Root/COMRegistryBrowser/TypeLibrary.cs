@@ -37,7 +37,8 @@ namespace ComBrowser
         {
             using (var typeLibKey = parentKey.OpenSubKey(guid))
             {
-                var subKeyNames = typeLibKey.GetSubKeyNames();
+                var subKeyNames = GetSubKeyNames(typeLibKey);
+
                 foreach (var versionName in subKeyNames)
                 {
                     using (var versionKey = typeLibKey.OpenSubKey(versionName))
@@ -64,6 +65,18 @@ namespace ComBrowser
                         }
                     }
                 }
+            }
+        }
+
+        private static string[] GetSubKeyNames(RegistryKey typeLibKey)
+        {
+            try
+            {
+                return typeLibKey.GetSubKeyNames();
+            }
+            catch
+            {
+                return new string[0];
             }
         }
 
