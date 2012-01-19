@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using DataGridExtensions;
 
 namespace DataGridExtensionsSample
@@ -40,7 +32,14 @@ namespace DataGridExtensionsSample
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            // Use the first integer filter for the integer column.
+            var header = e.Column.Header;
+
+            if (header != null)
+            {
+                e.Column.Header = new ContentControl() { Template = (ControlTemplate)FindResource("FilteredGridColumnHeaderFilterHostTemplate"), Content = header, HorizontalAlignment= HorizontalAlignment.Stretch };
+            }
+
+            // Use the integer filter for the integer column.
             if (e.PropertyType == typeof(int))
             {
                 e.Column.SetTemplate((ControlTemplate)this.FindResource("IntegerFilter"));

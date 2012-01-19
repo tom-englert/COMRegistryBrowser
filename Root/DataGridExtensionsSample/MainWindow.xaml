@@ -31,12 +31,20 @@
     <!-- The left grid shows how to customize the filters when using auto generated columns. 
         See the DataGrid_AutoGeneratingColumn event handler for details. 
         Overrides the content filter factory to use the regex matching instead of the default simple "string contains" matching.
+    
+              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
+    
     -->    
     <DataGrid ItemsSource="{Binding Items}" 
-              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
               AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
               dgx:DataGridFilter.ContentFilterFactory="{StaticResource RegexContentFilterFactory}"
-              />
+              >
+      <DataGrid.ColumnHeaderStyle>
+        <Style TargetType="DataGridColumnHeader">
+          <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+      </DataGrid.ColumnHeaderStyle>
+    </DataGrid>
 
     <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
     
