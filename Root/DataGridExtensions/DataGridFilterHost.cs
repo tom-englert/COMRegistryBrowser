@@ -40,17 +40,25 @@ namespace DataGridExtensions
             this.dataGrid = dataGrid;
             this.deferFilterEvaluationTimer = new DispatcherTimer(TimeSpan.FromSeconds(0.3), DispatcherPriority.Input, (_, __) => EvaluateFilter(), Dispatcher.CurrentDispatcher);
             this.dataGrid.Columns.CollectionChanged += Columns_CollectionChanged;
+            if (this.dataGrid.ColumnHeaderStyle == null)
+            {
+                // Assign a default style that changes HorizontalContentAlignment to "Stretch", so our filter symbol will appear on the right edge of the column.
+                this.dataGrid.ColumnHeaderStyle = (Style)dataGrid.FindResource(DataGridFilter.DataGridColumnHeaderDefaultStyleKey);
+            }
         }
 
         private void Columns_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if ((e != null) && (e.NewItems != null))
             {
-                foreach (DataGridColumn column in e.NewItems)
+                if (DataGridFilter.GetIsAutoFilterEnabled(dataGrid))
                 {
-                    if (column.GetIsFilterVisible())
+                    foreach (DataGridColumn column in e.NewItems)
                     {
-                        column.HeaderTemplate = (DataTemplate)dataGrid.FindResource("FilteredGridColumnHeaderFilterHostTemplate");
+                        if (column.GetIsFilterVisible())
+                        {
+                            column.HeaderTemplate = (DataTemplate)dataGrid.FindResource(DataGridFilter.ColumnHeaderTemplateKey);
+                        }
                     }
                 }
             }
@@ -66,7 +74,7 @@ namespace DataGridExtensions
         }
 
         /// <summary>
-        /// When any filter condition has changed restart the evaluation timer to defer 
+        /// When any filter condition has changed restart the evaluation timer to defer
         /// the evaluation until the user has stopped typing.
         /// </summary>
         internal void FilterChanged()

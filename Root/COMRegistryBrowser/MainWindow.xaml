@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:src="clr-namespace:ComBrowser"
-        xmlns:dge="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
+        xmlns:dgx="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
         xmlns:win32="clr-namespace:Microsoft.Win32;assembly=mscorlib"
         Title="MainWindow" Height="350" Width="525"
         TextOptions.TextFormattingMode="Display"
@@ -12,33 +12,29 @@
     <src:Browser/>
   </Window.DataContext>
   <Window.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/DataGridExtensions;component/Styles.xaml"/>
-      </ResourceDictionary.MergedDictionaries>
 
-      <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <dgx:RegexContentFilterFactory x:Key="RegexContentFilterFactory"/>
+    <dgx:SimpleContentFilterFactory x:Key="SimpleContentFilterFactory"/>
 
-      <ContextMenu x:Key="ServersContextMenu">
-        <MenuItem Header="Unregister selected servers" Click="UnregisterServers_Click"/>
-      </ContextMenu>
-      <ContextMenu x:Key="InterfacesContextMenu">
-        <MenuItem Header="Unregister selected interfaces" Click="UnregisterInterfaces_Click"/>
-      </ContextMenu>
-      <ContextMenu x:Key="TypeLibrariesContextMenu">
-        <MenuItem Header="Unregister selected type libraries" Click="UnregisterTypeLibraries_Click"/>
-      </ContextMenu>
+    <ContextMenu x:Key="ServersContextMenu">
+      <MenuItem Header="Unregister selected servers" Click="UnregisterServers_Click"/>
+    </ContextMenu>
+    <ContextMenu x:Key="InterfacesContextMenu">
+      <MenuItem Header="Unregister selected interfaces" Click="UnregisterInterfaces_Click"/>
+    </ContextMenu>
+    <ContextMenu x:Key="TypeLibrariesContextMenu">
+      <MenuItem Header="Unregister selected type libraries" Click="UnregisterTypeLibraries_Click"/>
+    </ContextMenu>
 
-      <Style TargetType="DataGrid">
-        <Setter Property="AlternatingRowBackground" Value="LightGreen"/>
-        <Setter Property="HorizontalGridLinesBrush" Value="LightGray"/>
-        <Setter Property="VerticalGridLinesBrush" Value="LightGray"/>
-        <Setter Property="dge:DataGridFilter.ContentFilterFactory" Value="{StaticResource RegexContentFilterFactory}"/>
-        <EventSetter Event="Loaded" Handler="DataGrid_Loaded"/>
-        <EventSetter Event="MouseDoubleClick" Handler="DataGrid_MouseDoubleClick"/>
-      </Style>
-      
-    </ResourceDictionary>
+    <Style TargetType="DataGrid">
+      <Setter Property="AlternatingRowBackground" Value="LightGreen"/>
+      <Setter Property="HorizontalGridLinesBrush" Value="LightGray"/>
+      <Setter Property="VerticalGridLinesBrush" Value="LightGray"/>
+      <Setter Property="dgx:DataGridFilter.ContentFilterFactory" Value="{StaticResource RegexContentFilterFactory}"/>
+      <EventSetter Event="Loaded" Handler="DataGrid_Loaded"/>
+      <EventSetter Event="MouseDoubleClick" Handler="DataGrid_MouseDoubleClick"/>
+    </Style>
+
   </Window.Resources>
 
   <Grid>
@@ -51,8 +47,8 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DataGrid x:Name="serversGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" 
-                    ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}" ContextMenu="{StaticResource ServersContextMenu}"/>
+            <DataGrid x:Name="serversGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" dgx:DataGridFilter.IsAutoFilterEnabled="True"
+                ContextMenu="{StaticResource ServersContextMenu}"/>
             <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
             <Grid Grid.Column="2">
               <Grid.RowDefinitions>
@@ -80,8 +76,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DataGrid x:Name="interfacesGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}"
-                    ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}" />
+            <DataGrid x:Name="interfacesGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
             <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
             <Grid Grid.Column="2">
               <Grid.RowDefinitions>
@@ -109,8 +104,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DataGrid x:Name="typeLibsGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" 
-                    ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"/>
+            <DataGrid x:Name="typeLibsGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
             <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
             <Grid Grid.Column="2">
               <Grid.RowDefinitions>
