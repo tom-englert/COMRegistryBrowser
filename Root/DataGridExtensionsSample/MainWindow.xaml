@@ -7,18 +7,15 @@
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
         Title="DataGrid dgx sample">
   <Window.Resources>
-    <ResourceDictionary>
-      <!-- We need to include the styles to use them -->
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/DataGridExtensions;component/Styles.xaml"/>
-      </ResourceDictionary.MergedDictionaries>
 
-      <!-- Template for a simple integer dgx control. -->
-      <ControlTemplate x:Key="IntegerFilter">
-        <src:IntegerGreatherThanFilterControl Filter="{Binding Path=Filter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}"/>
-      </ControlTemplate>
+    <dgx:RegexContentFilterFactory x:Key="RegexContentFilterFactory"/>
+    <dgx:SimpleContentFilterFactory x:Key="SimpleContentFilterFactory"/>
 
-    </ResourceDictionary>
+    <!-- Template for a simple integer dgx control. -->
+    <ControlTemplate x:Key="IntegerFilter">
+      <src:IntegerGreatherThanFilterControl Filter="{Binding Path=Filter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}"/>
+    </ControlTemplate>
+
   </Window.Resources>
 
   <Grid>
@@ -31,14 +28,11 @@
     <!-- The left grid shows how to customize the filters when using auto generated columns. 
         See the DataGrid_AutoGeneratingColumn event handler for details. 
         Overrides the content filter factory to use the regex matching instead of the default simple "string contains" matching.
-    
-              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
-    
-    -->    
+    -->
     <DataGrid ItemsSource="{Binding Items}" 
               AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
               dgx:DataGridFilter.ContentFilterFactory="{StaticResource RegexContentFilterFactory}"
-              dgx:DataGridFilter.IsFilterEnabled="True"
+              dgx:DataGridFilter.IsAutoFilterEnabled="True"
               >
       <DataGrid.ColumnHeaderStyle>
         <Style TargetType="DataGridColumnHeader">
@@ -48,25 +42,31 @@
     </DataGrid>
 
     <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
-    
+
     <!-- The right grid shows how to customize the filters in XAML when using explicit generated columns. 
-              ColumnHeaderStyle="{StaticResource FilteredGridColumnHeaderStyle}"
     -->
-    
+
     <DataGrid ItemsSource="{Binding Items}" Grid.Column="2"
               AutoGenerateColumns="False"
-              dgx:DataGridFilter.IsFilterEnabled="True"
+              dgx:DataGridFilter.IsAutoFilterEnabled="True"
               >
+      <DataGrid.Resources>
+        <!-- Override the filter icon used in the default templates with an orange symbol; active for this grid only -->
+        <ControlTemplate x:Key="{x:Static dgx:DataGridFilter.IconTemplateKey}">
+          <Path Data="M0,0 L10,0 6,4 6,9 4,9 4,4 Z" Fill="Orange" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,0"/>
+        </ControlTemplate>
+      </DataGrid.Resources>
+      
       <DataGrid.Columns>
-        <!-- Use a check box column for the boolean property "Flag" but override the column data type to use the default text dgx. -->
-        <DataGridCheckBoxColumn Header="Bool/Text" Binding="{Binding Flag, Mode=OneWay}" dgx:DataGridFilterColumn.Template="{StaticResource {x:Type DataGridTextColumn}}"/>
-        <!-- Use the second integer dgx for the integer column. -->
+        <!-- Use a check box column for the boolean property "Flag" but override the column data type to use the default text filter template. -->
+        <DataGridCheckBoxColumn Header="Bool/Text" Binding="{Binding Flag, Mode=OneWay}" dgx:DataGridFilterColumn.Template="{StaticResource {x:Static dgx:DataGridFilter.TextColumnFilterTemplateKey}}"/>
+        <!-- Use the integer filter for the integer column. -->
         <DataGridTextColumn Header="Integer/Custom" Binding="{Binding Index, Mode=OneWay}" dgx:DataGridFilterColumn.Template="{StaticResource IntegerFilter}"/>
-        <!-- Hide the dgx for this column. -->
+        <!-- Hide the filter for this column. -->
         <DataGridTextColumn Header="Text/No Filter" Binding="{Binding Column1, Mode=OneWay}" dgx:DataGridFilterColumn.IsFilterVisible="False"/>
-        <!-- Use the default dgx for this column. -->
+        <!-- Use the default filter for this column. -->
         <DataGridTextColumn Header="Text/Text" Binding="{Binding Column2, Mode=OneWay}"/>
-        <!-- Use the default dgx for this column. -->
+        <!-- Use the default filter for this column. -->
         <DataGridTextColumn Header="Double/Text" Binding="{Binding Probability, Mode=OneWay}"/>
       </DataGrid.Columns>
     </DataGrid>

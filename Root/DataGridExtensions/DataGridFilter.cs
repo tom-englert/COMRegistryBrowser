@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace DataGridExtensions
 {
@@ -9,23 +10,23 @@ namespace DataGridExtensions
     /// </summary>
     public static class DataGridFilter
     {
-        #region IsFilterEnabled attached property
+        #region IsAutoFilterEnabled attached property
 
-        public static bool GetIsFilterEnabled(DataGrid obj)
+        public static bool GetIsAutoFilterEnabled(DataGrid obj)
         {
-            return (bool)obj.GetValue(IsFilterEnabledProperty);
+            return (bool)obj.GetValue(IsAutoFilterEnabledProperty);
         }
-        public static void SetIsFilterEnabled(DataGrid obj, bool value)
+        public static void SetIsAutoFilterEnabled(DataGrid obj, bool value)
         {
-            obj.SetValue(IsFilterEnabledProperty, value);
+            obj.SetValue(IsAutoFilterEnabledProperty, value);
         }
         /// <summary>
-        /// Identifies the IsFilterEnabled dependency property
+        /// Identifies the IsAutoFilterEnabled dependency property
         /// </summary>
-        public static readonly DependencyProperty IsFilterEnabledProperty =
-            DependencyProperty.RegisterAttached("IsFilterEnabled", typeof(bool), typeof(DataGridFilter), new UIPropertyMetadata(false, IsFilterEnabled_Changed));
+        public static readonly DependencyProperty IsAutoFilterEnabledProperty =
+            DependencyProperty.RegisterAttached("IsAutoFilterEnabled", typeof(bool), typeof(DataGridFilter), new UIPropertyMetadata(false, IsAutoFilterEnabled_Changed));
 
-        private static void IsFilterEnabled_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void IsAutoFilterEnabled_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var dataGrid = sender as DataGrid;
             if (dataGrid != null)
@@ -98,5 +99,61 @@ namespace DataGridExtensions
         }
 
         #endregion
+
+        public static ResourceKey TextColumnFilterTemplateKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), typeof(DataGridTextColumn));
+            }
+        }
+
+        public static ResourceKey CheckBoxColumnFilterTemplateKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), typeof(DataGridCheckBoxColumn));
+            }
+        }
+
+        public static ResourceKey ColumnHeaderTemplateKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), typeof(DataGridColumn));
+            }
+        }
+
+        public static ResourceKey DataGridColumnHeaderDefaultStyleKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), typeof(DataGridColumnHeader));
+            }
+        }
+
+        public static ResourceKey IconTemplateKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), "IconTemplate");
+            }
+        }
+
+        public static ResourceKey ColumnHeaderSeachCheckBoxStyleKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), "ColumnHeaderSeachCheckBoxStyle");
+            }
+        }
+
+        public static ResourceKey ColumnHeaderSeachTextBoxStyleKey
+        {
+            get
+            {
+                return new ComponentResourceKey(typeof(DataGridFilter), "ColumnHeaderSeachTextBoxStyle");
+            }
+        }
     }
 }

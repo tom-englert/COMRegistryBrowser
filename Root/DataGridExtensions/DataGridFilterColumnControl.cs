@@ -11,7 +11,7 @@ namespace DataGridExtensions
 {
     /// <summary>
     /// This class is the control hosting all information needed for filtering of one column.
-    /// Filtering is enabled by simply adding this control to the control template of the DataGridColumnHeader.
+    /// Filtering is enabled by simply adding this control to the header template of the DataGridColumn.
     /// </summary>
     public sealed class DataGridFilterColumnControl : Control, INotifyPropertyChanged
     {
@@ -69,8 +69,8 @@ namespace DataGridExtensions
             // Must set a non-null empty template here, else we won't get the coerce value callback when the columns attached property is null!
             Template = EmptyControlTemplate;
 
-            // Load our IsFilterVisible and Template properties from the corresponding properties attached to the
-            // DataGridColumnHeader.Column property. Use binding since columnHeader.Column is still null at this point.
+            // Bind our IsFilterVisible and Template properties to the corresponding properties attached to the
+            // DataGridColumnHeader.Column property. Use binding instead of simple assignment since columnHeader.Column is still null at this point.
             var isFilterVisiblePropertyPath = new PropertyPath("Column.(0)", DataGridFilterColumn.IsFilterVisibleProperty);
             BindingOperations.SetBinding(this, VisibilityProperty, new Binding() { Path = isFilterVisiblePropertyPath, Source = columnHeader, Mode = BindingMode.OneWay, Converter = BooleanToVisibilityConverter });
 
@@ -127,7 +127,7 @@ namespace DataGridExtensions
                     var column = control.columnHeader.Column;
                     if (column != null)
                     {
-                        return control.TryFindResource(column.GetType()) as ControlTemplate;
+                        return control.TryFindResource(new ComponentResourceKey(typeof(DataGridFilter), column.GetType())) as ControlTemplate;
                     }
                 }
             }

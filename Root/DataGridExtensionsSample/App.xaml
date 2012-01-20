@@ -3,11 +3,5 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
   <Application.Resources>
-    <ResourceDictionary>
-      <!-- We need to include the styles to use them -->
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/DataGridExtensions;component/Styles.xaml"/>
-      </ResourceDictionary.MergedDictionaries>
-    </ResourceDictionary>
   </Application.Resources>
 </Application>
