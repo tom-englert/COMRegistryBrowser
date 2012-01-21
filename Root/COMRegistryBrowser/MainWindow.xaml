@@ -5,8 +5,7 @@
         xmlns:src="clr-namespace:ComBrowser"
         xmlns:dgx="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
         xmlns:win32="clr-namespace:Microsoft.Win32;assembly=mscorlib"
-        Title="MainWindow" Height="350" Width="525"
-        TextOptions.TextFormattingMode="Display"
+        Title="COM Registry Browser" TextOptions.TextFormattingMode="Display"
         >
   <Window.DataContext>
     <src:Browser/>
