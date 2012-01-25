@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Win32;
 using System.IO;
+using System.Linq;
+using Microsoft.Win32;
 
 namespace ComBrowser
 {
@@ -12,6 +10,7 @@ namespace ComBrowser
         private string fullPath;
         private string fileName;
         private string assembly;
+        private string threadingModel;
 
         public Server(RegistryKey parentKey, string guid)
             : base(guid)
@@ -21,6 +20,7 @@ namespace ComBrowser
                 Name = serverKey.GetDefaultValue();
                 fullPath = serverKey.GetDefaultValue(@"InprocServer32") ?? serverKey.GetDefaultValue(@"LocalServer32");
                 assembly = serverKey.GetSubKeyValue(@"InprocServer32", @"Assembly");
+                threadingModel = serverKey.GetSubKeyValue(@"InprocServer32", @"ThreadingModel");
             }
 
             if (fullPath != null)
@@ -52,6 +52,11 @@ namespace ComBrowser
                 {
                 }
             }
+        }
+
+        public string ThreadingModel
+        {
+            get { return this.threadingModel; }
         }
 
         public string FullPath
