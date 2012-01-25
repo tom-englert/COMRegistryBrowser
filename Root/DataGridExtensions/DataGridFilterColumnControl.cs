@@ -190,6 +190,14 @@ namespace DataGridExtensions
             OnPropertyChanged("Values");
         }
 
+        internal DataGridColumn Column
+        {
+            get
+            {
+                return columnHeader.Column;
+            }
+        }
+
         /// <summary>
         /// Identifies the CellValue dependency property, a private helper property used to evaluate the property path for the list items.
         /// </summary>

@@ -27,6 +27,10 @@ namespace DataGridExtensions
         /// Timer to defer evaluation of the filter until user has stopped typing.
         /// </summary>
         private readonly DispatcherTimer deferFilterEvaluationTimer;
+        /// <summary>
+        /// The columns that we are currently filtering.
+        /// </summary>
+        private DataGridColumn[] filteredColumns = new DataGridColumn[0];
 
         /// <summary>
         /// Create a new filter for the given data grid.
@@ -47,22 +51,10 @@ namespace DataGridExtensions
             }
         }
 
-        private void Columns_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if ((e != null) && (e.NewItems != null))
-            {
-                if (DataGridFilter.GetIsAutoFilterEnabled(dataGrid))
-                {
-                    foreach (DataGridColumn column in e.NewItems)
-                    {
-                        if (column.GetIsFilterVisible())
-                        {
-                            column.HeaderTemplate = (DataTemplate)dataGrid.FindResource(DataGridFilter.ColumnHeaderTemplateKey);
-                        }
-                    }
-                }
-            }
-        }
+        /// <summary>
+        /// Occurs before new columns are filtered.
+        /// </summary>
+        public event EventHandler<DataGridFilteringEventArgs> Filtering;
 
         /// <summary>
         /// Clear all existing filter conditions.
@@ -107,6 +99,29 @@ namespace DataGridExtensions
             return DataGridFilter.GetContentFilterFactory(dataGrid).Create(content);
         }
 
+        private void Columns_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if ((e != null) && (e.NewItems != null))
+            {
+                if (DataGridFilter.GetIsAutoFilterEnabled(dataGrid))
+                {
+                    foreach (DataGridColumn column in e.NewItems)
+                    {
+                        if (column.GetIsFilterVisible())
+                        {
+                            var originalHeaderTemplate = column.HeaderTemplate;
+                            column.HeaderTemplate = (DataTemplate)dataGrid.FindResource(DataGridFilter.ColumnHeaderTemplateKey);
+
+                            if (originalHeaderTemplate != null)
+                            {
+                                // TODO: apply original template to content?
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Evaluates the current filters and applies the filtering to the collection view of the items control.
         /// </summary>
@@ -122,6 +137,27 @@ namespace DataGridExtensions
 
             // Collect all active filters of all known columns.
             var filters = filterColumns.Where(column => column.IsFiltered).ToArray();
+
+            if (Filtering != null)
+            {
+                // Notify client about additional columns being filtered.
+                var columns = filters.Select(filter => filter.Column).Where(column => column != null).ToArray();
+                var newColumns = columns.Except(filteredColumns).ToArray();
+
+                if (newColumns.Length > 0)
+                {
+                    var args = new DataGridFilteringEventArgs(newColumns);
+                    Filtering(dataGrid, args);
+
+
+                    if (args.Cancel)
+                    {
+                        return;
+                    }
+                }
+
+                filteredColumns = columns;
+            }
 
             // Apply filter to collection view
             if (!filters.Any())

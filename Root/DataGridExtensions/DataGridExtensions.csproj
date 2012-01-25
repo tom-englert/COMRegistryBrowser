@@ -64,6 +64,7 @@
     <Compile Include="DataGridFilterColumn.cs" />
     <Compile Include="DataGridFilterHost.cs" />
     <Compile Include="DataGridFilterColumnControl.cs" />
+    <Compile Include="DataGridFilteringEventArgs.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="IContentFilter.cs" />
     <Compile Include="IContentFilterFactory.cs" />
