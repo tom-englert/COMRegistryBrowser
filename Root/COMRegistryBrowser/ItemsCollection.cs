@@ -18,6 +18,12 @@ namespace ComBrowser
             BindingOperations.SetBinding(this, ItemsViewProperty, new Binding() { Source = itemsViewSource, Mode = BindingMode.OneWay });
         }
 
+        public ItemsCollection(Predicate<T> filter)
+            : this()
+        {
+            this.Filter = filter;
+        }
+
         public T CurrentItem
         {
             get { return (T)GetValue(CurrentItemProperty); }

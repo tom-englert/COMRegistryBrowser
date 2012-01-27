@@ -10,11 +10,8 @@ namespace ComBrowser
     {
         public InterfaceCollection(Browser browser)
         {
-            ServerCollection = new ItemsCollection<Server>();
-            TypeLibraryCollection = new ItemsCollection<TypeLibrary>();
-
-            ServerCollection.Filter = ServerFilter;
-            TypeLibraryCollection.Filter = TypeLibraryFilter;
+            ServerCollection = new ItemsCollection<Server>(ServerFilter);
+            TypeLibraryCollection = new ItemsCollection<TypeLibrary>(TypeLibraryFilter);
 
             BindingOperations.SetBinding(ServerCollection, ItemsCollection<Server>.ItemsProperty, new Binding("ServerCollection.Items") { Source = browser, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(TypeLibraryCollection, ItemsCollection<TypeLibrary>.ItemsProperty, new Binding("TypeLibraryCollection.Items") { Source = browser, Mode = BindingMode.OneWay });
