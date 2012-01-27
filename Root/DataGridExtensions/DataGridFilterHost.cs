@@ -42,7 +42,7 @@ namespace DataGridExtensions
                 throw new ArgumentNullException("dataGrid");
 
             this.dataGrid = dataGrid;
-            this.deferFilterEvaluationTimer = new DispatcherTimer(TimeSpan.FromSeconds(0.3), DispatcherPriority.Input, (_, __) => EvaluateFilter(), Dispatcher.CurrentDispatcher);
+            this.deferFilterEvaluationTimer = new DispatcherTimer(TimeSpan.FromSeconds(0.5), DispatcherPriority.Input, (_, __) => EvaluateFilter(), Dispatcher.CurrentDispatcher);
             this.dataGrid.Columns.CollectionChanged += Columns_CollectionChanged;
             if (this.dataGrid.ColumnHeaderStyle == null)
             {

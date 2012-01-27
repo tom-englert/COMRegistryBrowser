@@ -118,6 +118,7 @@
     <Compile Include="Interface.cs" />
     <Compile Include="InterfaceCollection.cs" />
     <Compile Include="ItemsCollection.cs" />
+    <Compile Include="MultiSelectorExtensions.cs" />
     <Compile Include="PathExtensions.cs" />
     <Compile Include="RegistryEntry.cs" />
     <Compile Include="RegistryExtensions.cs" />
