@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace AVL.Core.WPF
+namespace COMRegistryBrowser
 {
     /// <summary>
     /// Extensions for multi selectors like ListBox or DataGrid:
@@ -12,6 +12,8 @@ namespace AVL.Core.WPF
     /// </list>
     /// </summary>
     /// <remarks>
+    /// SelectionBinding:
+    /// <para/>
     /// Since there is no common interface for ListBox and DataGrid, the SelectionBinding is implemented via reflection/dynamics, so it will
     /// work on any FrameworkElement that has the SelectedItems, SelectedItem and SelectedItemIndex properties and the SelectionChanged event.
     /// </remarks>
@@ -48,8 +50,9 @@ namespace AVL.Core.WPF
         /// </summary>
         /// <example>
         /// If your view model has two properties "AnyList Items { get; }" and "IList SelectedItems { get; set; }" your XAML looks like this:
+        /// <para/>
         /// <![CDATA[ 
-        /// <ListBox ItemsSource="{Binding Path=Items}" core:MultiSelectorExtensions.SelectionBinding="{Binding Path=SelectedItems}"/>
+        /// <ListBox ItemsSource="{Binding Path=Items}" src:MultiSelectorExtensions.SelectionBinding="{Binding Path=SelectedItems}"/>
         /// ]]>
         /// </example>
         public static readonly DependencyProperty SelectionBindingProperty =
@@ -58,8 +61,7 @@ namespace AVL.Core.WPF
         [ContractVerification(false)] // Contracts get confused by dynamic variables.
         private static void SelectionBinding_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            Contract.Requires(d != null);
-            Contract.Requires(d is FrameworkElement);
+            // The selector is the target of the binding, and the ViewModel property is the source.
 
             if (!selectionBindingIsUpdatingSource)
             {
@@ -73,26 +75,28 @@ namespace AVL.Core.WPF
                     eventInfo.AddEventHandler(selector, (SelectionChangedEventHandler)selector_SelectionChanged);
                 }
 
-                var dynamicSelector = (dynamic)selector;
+                var bindingTarget = (dynamic)selector;
 
                 selectionBindingIsUpdatingTarget = true;
 
-                dynamicSelector.SelectedIndex = -1;
+                // Updating this direction is a rare case, usually happens only once.
+                // Use a very simple approach to update the target - just clear the list and then add all selected again.
+                bindingTarget.SelectedIndex = -1;
 
-                var target = (IList)e.NewValue;
+                var bindingSource = (IList)e.NewValue;
 
-                if (target != null)
+                if (bindingSource != null)
                 {
-                    if (target.Count == 1)
+                    if (bindingSource.Count == 1)
                     {
                         // Special handling, maybe listbox is in single selection mode, so this will work either.
-                        dynamicSelector.SelectedItem = target[0];
+                        bindingTarget.SelectedItem = bindingSource[0];
                     }
                     else
                     {
-                        var selectedItems = (IList)dynamicSelector.SelectedItems;
+                        var selectedItems = (IList)bindingTarget.SelectedItems;
 
-                        foreach (var item in target)
+                        foreach (var item in bindingSource)
                         {
                             selectedItems.Add(item);
                         }

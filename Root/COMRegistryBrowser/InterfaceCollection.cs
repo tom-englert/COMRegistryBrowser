@@ -2,66 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Data;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal class InterfaceCollection : ItemsCollection<Interface>
     {
         public InterfaceCollection(Browser browser)
+            : base(browser, null)
         {
-            ServerCollection = new ItemsCollection<Server>(ServerFilter);
-            TypeLibraryCollection = new ItemsCollection<TypeLibrary>(TypeLibraryFilter);
-
-            BindingOperations.SetBinding(ServerCollection, ItemsCollection<Server>.ItemsProperty, new Binding("ServerCollection.Items") { Source = browser, Mode = BindingMode.OneWay });
-            BindingOperations.SetBinding(TypeLibraryCollection, ItemsCollection<TypeLibrary>.ItemsProperty, new Binding("TypeLibraryCollection.Items") { Source = browser, Mode = BindingMode.OneWay });
         }
 
-        private bool ServerFilter(Server server)
+        public InterfaceCollection(Browser browser, Predicate<Interface> filter)
+            : base(browser, filter)
         {
-            if (server == null)
-                return false;
-
-            var current = CurrentItem;
-
-            if (current == null)
-                return false;
-
-            return string.Equals(server.Guid, current.ProxyStub, StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool TypeLibraryFilter(TypeLibrary typeLibrary)
+        internal override void GetDependencies(Interface item, HashSet<RegistryEntry> dependencies)
         {
-            if (typeLibrary == null)
-                return false;
-
-            var current = CurrentItem;
-
-            if (current == null)
-                return false;
-
-            return string.Equals(typeLibrary.Guid, current.TypeLibrary, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(typeLibrary.Version, current.TlbVersion, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public ItemsCollection<Server> ServerCollection
-        {
-            get;
-            private set;
-        }
-
-        public ItemsCollection<TypeLibrary> TypeLibraryCollection
-        {
-            get;
-            private set;
-        }
-
-        protected override void OnCurrentItemChanged(Interface oldValue, Interface newValue)
-        {
-            base.OnCurrentItemChanged(oldValue, newValue);
-
-            ServerCollection.Refresh();
-            TypeLibraryCollection.Refresh();
+            GetDependencies(Browser.ServerCollection, RelatedServerPredicate(item), dependencies);
+            GetDependencies(Browser.TypeLibraryCollection, RelatedTypeLibraryPredicate(item), dependencies);
         }
     }
 }

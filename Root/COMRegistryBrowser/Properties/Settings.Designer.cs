@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ComBrowser.Properties
+namespace COMRegistryBrowser.Properties
 {
 
 

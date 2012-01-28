@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Win32;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal class Interface : RegistryEntry, IEquatable<Interface>
     {

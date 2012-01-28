@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     public static class FrameworkExtensions
     {

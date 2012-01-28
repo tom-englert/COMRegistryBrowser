@@ -117,14 +117,17 @@
     <Compile Include="FrameworkExtensions.cs" />
     <Compile Include="Interface.cs" />
     <Compile Include="InterfaceCollection.cs" />
+    <Compile Include="MasterInterfaceCollection.cs" />
     <Compile Include="ItemsCollection.cs" />
     <Compile Include="MultiSelectorExtensions.cs" />
     <Compile Include="PathExtensions.cs" />
     <Compile Include="RegistryEntry.cs" />
     <Compile Include="RegistryExtensions.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="MasterServerCollection.cs" />
     <Compile Include="ServerCollection.cs" />
     <Compile Include="TypeLibrary.cs" />
+    <Compile Include="MasterTypeLibraryCollection.cs" />
     <Compile Include="TypeLibraryCollection.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

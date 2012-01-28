@@ -18,7 +18,7 @@ using System.Reactive;
 using System.Windows.Controls.Primitives;
 using DataGridExtensions;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -157,28 +157,5 @@ namespace ComBrowser
                 targetGrid.SelectedItem = currentItem;
             });
         }
-
-        private void UnregisterServers_Click(object sender, RoutedEventArgs e)
-        {
-            var contextMenu = ((DependencyObject)sender).FindAncestor<ContextMenu>();
-            var dataGrid = contextMenu.PlacementTarget as DataGrid;
-
-            if (dataGrid != null)
-            {
-                var selectedServers = dataGrid.SelectedItems.OfType<Server>().ToArray();
-                MessageBox.Show("Unregister " + selectedServers.Length);
-            }
-        }
-
-        private void UnregisterInterfaces_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void UnregisterTypeLibraries_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
     }
 }
