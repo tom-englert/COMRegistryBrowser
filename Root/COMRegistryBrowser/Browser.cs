@@ -5,7 +5,7 @@ using System.Threading;
 using System.Windows;
 using Microsoft.Win32;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal sealed class Browser : DependencyObject, INotifyPropertyChanged
     {
@@ -15,9 +15,9 @@ namespace ComBrowser
 
         public Browser()
         {
-            ServerCollection = new ServerCollection(this);
-            InterfaceCollection = new InterfaceCollection(this);
-            TypeLibraryCollection = new TypeLibraryCollection(this);
+            ServerCollection = new MasterServerCollection(this);
+            InterfaceCollection = new MasterInterfaceCollection(this);
+            TypeLibraryCollection = new MasterTypeLibraryCollection(this);
 
             BeginRefresh();
         }
@@ -79,40 +79,40 @@ namespace ComBrowser
         }
 
 
-        public ServerCollection ServerCollection
+        public MasterServerCollection ServerCollection
         {
-            get { return (ServerCollection)GetValue(ServerCollectionProperty); }
+            get { return (MasterServerCollection)GetValue(ServerCollectionProperty); }
             set { SetValue(ServerCollectionProperty, value); }
         }
         /// <summary>
         /// Identifies the ServerCollection dependency property
         /// </summary>
         public static readonly DependencyProperty ServerCollectionProperty =
-            DependencyProperty.Register("ServerCollection", typeof(ServerCollection), typeof(Browser));
+            DependencyProperty.Register("ServerCollection", typeof(MasterServerCollection), typeof(Browser));
 
 
-        public InterfaceCollection InterfaceCollection
+        public MasterInterfaceCollection InterfaceCollection
         {
-            get { return (InterfaceCollection)GetValue(InterfaceCollectionProperty); }
+            get { return (MasterInterfaceCollection)GetValue(InterfaceCollectionProperty); }
             set { SetValue(InterfaceCollectionProperty, value); }
         }
         /// <summary>
         /// Identifies the InterfaceCollection dependency property
         /// </summary>
         public static readonly DependencyProperty InterfaceCollectionProperty =
-            DependencyProperty.Register("InterfaceCollection", typeof(InterfaceCollection), typeof(Browser));
+            DependencyProperty.Register("InterfaceCollection", typeof(MasterInterfaceCollection), typeof(Browser));
 
 
-        public TypeLibraryCollection TypeLibraryCollection
+        public MasterTypeLibraryCollection TypeLibraryCollection
         {
-            get { return (TypeLibraryCollection)GetValue(TypeLibraryCollectionProperty); }
+            get { return (MasterTypeLibraryCollection)GetValue(TypeLibraryCollectionProperty); }
             set { SetValue(TypeLibraryCollectionProperty, value); }
         }
         /// <summary>
         /// Identifies the TypeLibraryCollection dependency property
         /// </summary>
         public static readonly DependencyProperty TypeLibraryCollectionProperty =
-            DependencyProperty.Register("TypeLibraryCollection", typeof(TypeLibraryCollection), typeof(Browser));
+            DependencyProperty.Register("TypeLibraryCollection", typeof(MasterTypeLibraryCollection), typeof(Browser));
 
 
         public bool IsLoading

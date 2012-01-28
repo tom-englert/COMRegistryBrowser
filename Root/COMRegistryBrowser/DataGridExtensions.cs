@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Windows.Controls;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal static class DataGridExtensions
     {

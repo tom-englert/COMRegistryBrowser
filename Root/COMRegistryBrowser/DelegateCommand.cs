@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Input;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal class DelegateCommand : ICommand
     {

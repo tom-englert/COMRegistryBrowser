@@ -1,8 +1,8 @@
-﻿<Window x:Class="ComBrowser.MainWindow"
+﻿<Window x:Class="COMRegistryBrowser.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
-        xmlns:src="clr-namespace:ComBrowser"
+        xmlns:src="clr-namespace:COMRegistryBrowser"
         xmlns:dgx="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
         xmlns:win32="clr-namespace:Microsoft.Win32;assembly=mscorlib"
         Title="COM Registry Browser" TextOptions.TextFormattingMode="Display"
@@ -10,26 +10,24 @@
   <Window.DataContext>
     <src:Browser/>
   </Window.DataContext>
+
   <Window.Resources>
 
     <dgx:RegexContentFilterFactory x:Key="RegexContentFilterFactory"/>
     <dgx:SimpleContentFilterFactory x:Key="SimpleContentFilterFactory"/>
 
-    <ContextMenu x:Key="ServersContextMenu">
-      <MenuItem Header="Unregister selected servers" Click="UnregisterServers_Click"/>
-    </ContextMenu>
-    <ContextMenu x:Key="InterfacesContextMenu">
-      <MenuItem Header="Unregister selected interfaces" Click="UnregisterInterfaces_Click"/>
-    </ContextMenu>
-    <ContextMenu x:Key="TypeLibrariesContextMenu">
-      <MenuItem Header="Unregister selected type libraries" Click="UnregisterTypeLibraries_Click"/>
+    <ContextMenu x:Key="ContextMenu">
+      <MenuItem Header="Unregister" Command="{Binding Path=UnregisterCommand}"/>
     </ContextMenu>
 
     <Style TargetType="DataGrid">
       <Setter Property="AlternatingRowBackground" Value="LightGreen"/>
       <Setter Property="HorizontalGridLinesBrush" Value="LightGray"/>
       <Setter Property="VerticalGridLinesBrush" Value="LightGray"/>
+      <Setter Property="ItemsSource" Value="{Binding Path=ItemsView}"/>
       <Setter Property="dgx:DataGridFilter.ContentFilterFactory" Value="{StaticResource RegexContentFilterFactory}"/>
+      <Setter Property="src:MultiSelectorExtensions.SelectionBinding" Value="{Binding Path=SelectedItems}"/>
+      <Setter Property="ContextMenu" Value="{StaticResource ContextMenu}"/>
       <EventSetter Event="Loaded" Handler="DataGrid_Loaded"/>
       <EventSetter Event="MouseDoubleClick" Handler="DataGrid_MouseDoubleClick"/>
     </Style>
@@ -46,8 +44,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DataGrid x:Name="serversGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" dgx:DataGridFilter.IsAutoFilterEnabled="True"
-                ContextMenu="{StaticResource ServersContextMenu}"/>
+            <DataGrid x:Name="serversGrid" Grid.Column="0" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
             <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
             <Grid Grid.Column="2">
               <Grid.RowDefinitions>
@@ -55,14 +52,14 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
               </Grid.RowDefinitions>
-              <DockPanel Grid.Row="0">
+              <DockPanel Grid.Row="0" DataContext="{Binding Path=InterfaceCollection}">
                 <TextBlock DockPanel.Dock="Top" Margin="4" Text="Interfaces marshalled by the selected server:"/>
-                <DataGrid ItemsSource="{Binding Path=InterfaceCollection.ItemsView}"/>
+                <DataGrid/>
               </DockPanel>
               <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-              <DockPanel Grid.Row="2">
+              <DockPanel Grid.Row="2" DataContext="{Binding Path=TypeLibraryCollection}">
                 <TextBlock DockPanel.Dock="Top" Margin="4" Text="Type libraries contained in the selected server:"/>
-                <DataGrid ItemsSource="{Binding Path=TypeLibraryCollection.ItemsView}"/>
+                <DataGrid/>
               </DockPanel>
             </Grid>
           </Grid>
@@ -75,7 +72,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DataGrid x:Name="interfacesGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
+            <DataGrid x:Name="interfacesGrid" Grid.Column="0" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
             <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
             <Grid Grid.Column="2">
               <Grid.RowDefinitions>
@@ -83,14 +80,14 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
               </Grid.RowDefinitions>
-              <DockPanel Grid.Row="0">
+              <DockPanel Grid.Row="0" DataContext="{Binding Path=ServerCollection}">
                 <TextBlock DockPanel.Dock="Top" Margin="4" Text="Servers marshalling the selected interface:"/>
-                <DataGrid ItemsSource="{Binding Path=ServerCollection.ItemsView}" ContextMenu="{StaticResource ServersContextMenu}"/>
+                <DataGrid/>
               </DockPanel>
               <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-              <DockPanel Grid.Row="2">
+              <DockPanel Grid.Row="2" DataContext="{Binding Path=TypeLibraryCollection}">
                 <TextBlock DockPanel.Dock="Top" Margin="4" Text="Type libraries defining the selected interface:"/>
-                <DataGrid ItemsSource="{Binding Path=TypeLibraryCollection.ItemsView}"/>
+                <DataGrid/>
               </DockPanel>
             </Grid>
           </Grid>
@@ -103,7 +100,7 @@
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DataGrid x:Name="typeLibsGrid" Grid.Column="0" ItemsSource="{Binding Path=ItemsView}" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
+            <DataGrid x:Name="typeLibsGrid" Grid.Column="0" dgx:DataGridFilter.IsAutoFilterEnabled="True"/>
             <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center"/>
             <Grid Grid.Column="2">
               <Grid.RowDefinitions>
@@ -111,14 +108,14 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
               </Grid.RowDefinitions>
-              <DockPanel Grid.Row="0">
+              <DockPanel Grid.Row="0" DataContext="{Binding Path=ServerCollection}">
                 <TextBlock DockPanel.Dock="Top" Margin="4" Text="Servers containing the selected type library:"/>
-                <DataGrid ItemsSource="{Binding Path=ServerCollection.ItemsView}" ContextMenu="{StaticResource ServersContextMenu}"/>
+                <DataGrid/>
               </DockPanel>
               <GridSplitter Grid.Row="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-              <DockPanel Grid.Row="2">
+              <DockPanel Grid.Row="2" DataContext="{Binding Path=InterfaceCollection}">
                 <TextBlock DockPanel.Dock="Top" Margin="4" Text="Interfaces contained in the selected type library:"/>
-                <DataGrid ItemsSource="{Binding Path=InterfaceCollection.ItemsView}"/>
+                <DataGrid/>
               </DockPanel>
             </Grid>
           </Grid>

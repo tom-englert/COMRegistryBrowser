@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Win32;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal class Server : RegistryEntry, IEquatable<Server>
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal static class PathExtensions
     {

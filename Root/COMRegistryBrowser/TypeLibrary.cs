@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Win32;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal class TypeLibrary : RegistryEntry, IEquatable<TypeLibrary>
     {

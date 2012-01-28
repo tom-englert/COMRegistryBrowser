@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
     internal class RegistryEntry
     {
@@ -15,7 +15,7 @@ namespace ComBrowser
 
 
         public RegistryEntry(string guid)
-            : this(guid, null)
+            : this(guid, string.Empty)
         {
         }
 
@@ -39,7 +39,7 @@ namespace ComBrowser
 
         public override string ToString()
         {
-            return GetType().Name + ": " + Name ?? Guid;
+            return GetType().Name + ": " + Name + " " + Guid;
         }
 
         /// <summary>

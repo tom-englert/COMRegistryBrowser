@@ -5,23 +5,25 @@ using System.Text;
 using System.Windows;
 using System.Windows.Data;
 using System.ComponentModel;
+using System.Windows.Input;
+using System.Collections;
 
-namespace ComBrowser
+namespace COMRegistryBrowser
 {
-    internal class ItemsCollection<T> : DependencyObject where T : class
+    internal abstract class ItemsCollection<T> : DependencyObject where T : RegistryEntry
     {
         private readonly CollectionViewSource itemsViewSource = new CollectionViewSource();
+        private readonly Browser browser;
+        private readonly Predicate<T> filter;
 
-        public ItemsCollection()
+        protected ItemsCollection(Browser browser, Predicate<T> filter)
         {
+            this.browser = browser;
+            this.filter = filter;
+
             BindingOperations.SetBinding(itemsViewSource, CollectionViewSource.SourceProperty, new Binding("Items") { Source = this, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(this, ItemsViewProperty, new Binding() { Source = itemsViewSource, Mode = BindingMode.OneWay });
-        }
 
-        public ItemsCollection(Predicate<T> filter)
-            : this()
-        {
-            this.Filter = filter;
         }
 
         public T CurrentItem
@@ -38,13 +40,6 @@ namespace ComBrowser
         private void CurrentItemChanged(T oldValue, T newValue)
         {
             OnCurrentItemChanged(oldValue, newValue);
-
-            //var collectionView = ItemsView;
-
-            //if (collectionView != null)
-            //{
-            //    collectionView.MoveCurrentTo(newValue);
-            //}
         }
 
         protected virtual void OnCurrentItemChanged(T oldValue, T newValue)
@@ -60,11 +55,7 @@ namespace ComBrowser
         /// Identifies the Items dependency property
         /// </summary>
         public static readonly DependencyProperty ItemsProperty =
-            DependencyProperty.Register("Items", typeof(IList<T>), typeof(ItemsCollection<T>), new UIPropertyMetadata(new PropertyChangedCallback((sender, e) => ((ItemsCollection<T>)sender).ItemsChanged((IList<T>)e.OldValue, (IList<T>)e.NewValue))));
-
-        private void ItemsChanged(IList<T> oldValue, IList<T> newValue)
-        {
-        }
+            DependencyProperty.Register("Items", typeof(IList<T>), typeof(ItemsCollection<T>));
 
         public ICollectionView ItemsView
         {
@@ -101,42 +92,158 @@ namespace ComBrowser
         {
             get
             {
-                if (Filter == null)
+                if (filter == null)
                     return null;
 
-                return (item) => this.Filter((T)item);
-            }
-        }
-
-        public Predicate<T> Filter
-        {
-            get { return (Predicate<T>)GetValue(FilterProperty); }
-            set { SetValue(FilterProperty, value); }
-        }
-        /// <summary>
-        /// Identifies the Filter dependency property
-        /// </summary>
-        public static readonly DependencyProperty FilterProperty =
-            DependencyProperty.Register("Filter", typeof(Predicate<T>), typeof(ItemsCollection<T>), new UIPropertyMetadata(new PropertyChangedCallback((sender, e) => ((ItemsCollection<T>)sender).Filter_Changed((Predicate<T>)e.NewValue))));
-
-        private void Filter_Changed(Predicate<T> newValue)
-        {
-            var collectionView = this.ItemsView;
-
-            if (collectionView != null)
-            {
-                collectionView.Filter = ActiveFilter;
+                return (item) => this.filter((T)item);
             }
         }
 
         public void Refresh()
-        { 
+        {
             var collectionView = this.ItemsView;
 
             if (collectionView != null)
             {
                 collectionView.Refresh();
             }
+        }
+
+        protected Browser Browser
+        {
+            get
+            {
+                return browser;
+            }
+        }
+
+        public IList SelectedItems
+        {
+            get;
+            set;
+        }
+
+        public ICommand UnregisterCommand
+        {
+            get
+            {
+                return new DelegateCommand
+                {
+                    CanExecuteCallback = delegate
+                    {
+                        return (SelectedItems != null) && (SelectedItems.Count > 0);
+                    },
+                    ExecuteCallback = delegate
+                    {
+                        UnregisterSelected();
+                    }
+                };
+            }
+        }
+
+        protected static void GetDependencies<Q>(ItemsCollection<Q> itemCollection, Predicate<Q> filter, HashSet<RegistryEntry> dependencies) where Q : RegistryEntry
+        {
+            var items = itemCollection.Items;
+            var dependentItems = items.Where(item => filter(item)).ToArray();
+
+            foreach (var dependentItem in dependentItems)
+            {
+                if (!dependencies.Contains(dependentItem))
+                {
+                    dependencies.Add(dependentItem);
+                    itemCollection.GetDependencies(dependentItem, dependencies);
+                }
+            }
+        }
+
+        internal abstract void GetDependencies(T item, HashSet<RegistryEntry> dependencies);
+
+        private void UnregisterSelected()
+        {
+            var selectedItems = SelectedItems.Cast<T>();
+            var itemsToRemove = new HashSet<RegistryEntry>(selectedItems.Cast<RegistryEntry>());
+
+            foreach (var item in selectedItems)
+            {
+                GetDependencies(item, itemsToRemove);
+            }
+
+            var itemsToRemoveText = string.Join("\n", itemsToRemove.Select(item => item.ToString()));
+
+            MessageBox.Show("Do you want to remove this entries?\n\n" + itemsToRemoveText);
+        }
+
+        private static bool AreRelated(Server server, Interface intf)
+        {
+            if ((server == null) || (intf == null))
+                return false;
+
+            return string.Equals(intf.ProxyStub, server.Guid, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool AreRelated(Server server, TypeLibrary typeLibrary)
+        {
+            if ((typeLibrary == null) || (server == null))
+                return false;
+
+            return string.Equals(typeLibrary.FullPath, server.FullPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool AreRelated(TypeLibrary typeLibrary, Interface intf)
+        {
+            if ((intf == null) || (typeLibrary == null))
+                return false;
+
+            return string.Equals(typeLibrary.Guid, intf.TypeLibrary, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(typeLibrary.Version, intf.TlbVersion, StringComparison.OrdinalIgnoreCase);
+        }
+
+        protected static Predicate<Interface> RelatedInterfacePredicate(Server server)
+        {
+            return delegate(Interface intf)
+            {
+                return AreRelated(server, intf);
+            };
+        }
+
+        protected static Predicate<Interface> RelatedInterfacePredicate(TypeLibrary typeLibrary)
+        {
+            return delegate(Interface intf)
+            {
+                return AreRelated(typeLibrary, intf);
+            };
+        }
+
+        protected static Predicate<Server> RelatedServerPredicate(Interface intf)
+        {
+            return delegate(Server server)
+            {
+                return AreRelated(server, intf);
+            };
+        }
+
+        protected static Predicate<Server> RelatedServerPredicate(TypeLibrary typeLibrary)
+        {
+            return delegate(Server server)
+            {
+                return AreRelated(server, typeLibrary);
+            };
+        }
+
+        protected static Predicate<TypeLibrary> RelatedTypeLibraryPredicate(Server server)
+        {
+            return delegate(TypeLibrary typeLibrary)
+            {
+                return AreRelated(server, typeLibrary);
+            };
+        }
+
+        protected static Predicate<TypeLibrary> RelatedTypeLibraryPredicate(Interface intf)
+        {
+            return delegate(TypeLibrary typeLibrary)
+            {
+                return AreRelated(typeLibrary, intf);
+            };
         }
     }
 }
