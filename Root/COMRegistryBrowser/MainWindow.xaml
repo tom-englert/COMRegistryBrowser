@@ -17,7 +17,11 @@
     <dgx:SimpleContentFilterFactory x:Key="SimpleContentFilterFactory"/>
 
     <ContextMenu x:Key="ContextMenu">
-      <MenuItem Header="Unregister" Command="{Binding Path=UnregisterCommand}"/>
+      <MenuItem Header="Unregister" Command="{Binding Path=UnregisterCommand}" VerticalContentAlignment="Center">
+        <MenuItem.Icon>
+          <Path Data="M0,0 L8,8 M0,8 L8,0" Stroke="Red" StrokeThickness="2" HorizontalAlignment="Center"/>
+        </MenuItem.Icon>
+      </MenuItem>
     </ContextMenu>
 
     <Style TargetType="DataGrid">
