@@ -7,6 +7,8 @@ namespace COMRegistryBrowser
 {
     internal class Server : RegistryEntry, IEquatable<Server>
     {
+        private const string rootKeyName = "CLSID";
+
         private string fullPath;
         private string fileName;
         private string assembly;
@@ -51,6 +53,27 @@ namespace COMRegistryBrowser
                 catch
                 {
                 }
+            }
+        }
+
+        internal static Server[] GetServers(RegistryKey classesRootKey)
+        {
+            using (var clsidKey = classesRootKey.OpenSubKey(rootKeyName))
+            {
+                System.Guid tempGuid;
+
+                return clsidKey.GetSubKeyNames()
+                    .Where(guid => System.Guid.TryParse(guid, out tempGuid))
+                    .Select(guid => new Server(clsidKey, guid))
+                    .ToArray();
+            }
+        }
+
+        protected override string RootKeyName
+        {
+            get
+            {
+                return rootKeyName;
             }
         }
 

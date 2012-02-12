@@ -43,12 +43,12 @@ namespace COMRegistryBrowser
             private set;
         }
 
-        protected override void OnCurrentItemChanged(Interface oldValue, Interface newValue)
+        protected override void OnSelectedItemsChanged(IEnumerable<Interface> newValue)
         {
-            base.OnCurrentItemChanged(oldValue, newValue);
+            base.OnSelectedItemsChanged(newValue);
 
-            serverFilterPredicate = RelatedServerPredicate(newValue);
-            typeLibraryFilterPredicate = RelatedTypeLibraryPredicate(newValue);
+            serverFilterPredicate = (server) => newValue.Select(item => RelatedServerPredicate(item)).Any(pred => pred(server));
+            typeLibraryFilterPredicate = (typeLibrary) => newValue.Select(item => RelatedTypeLibraryPredicate(item)).Any(pred => pred(typeLibrary));
 
             ServerCollection.Refresh();
             TypeLibraryCollection.Refresh();

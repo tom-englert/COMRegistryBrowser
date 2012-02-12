@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using Microsoft.Win32;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace COMRegistryBrowser
 {
@@ -36,41 +39,16 @@ namespace COMRegistryBrowser
 
                     using (var classesRootKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, registryView))
                     {
-                        using (var clsidKey = classesRootKey.OpenSubKey("CLSID"))
-                        {
-                            servers = clsidKey.GetSubKeyNames()
-                                //.AsParallel()
-                                .Select(guid => new Server(clsidKey, guid))
-                                //.Take(20)
-                                .ToArray();
-                        }
-
-                        using (var typeLibKey = classesRootKey.OpenSubKey("TypeLib"))
-                        {
-                            typeLibraries = typeLibKey.GetSubKeyNames()
-                                //.AsParallel()
-                                .SelectMany(guid => TypeLibrary.GetTypeLibrarys(typeLibKey, guid))
-                                //.Take(20)
-                                .ToArray();
-                        }
-
-                        using (var interfaceKey = classesRootKey.OpenSubKey("Interface"))
-                        {
-                            var tlbLookup = typeLibraries.ToDictionary(t => t.Key);
-
-                            interfaces = interfaceKey.GetSubKeyNames()
-                                //.AsParallel()
-                                .Select(guid => new Interface(interfaceKey, guid, tlbLookup))
-                                //.Take(20)
-                                .ToArray();
-                        }
+                        servers = Server.GetServers(classesRootKey);
+                        typeLibraries = TypeLibrary.GetTypeLibrarys(classesRootKey);
+                        interfaces = Interface.GetInterfaces(classesRootKey, servers, typeLibraries);
                     }
 
                     Dispatcher.Invoke((Action)delegate
                     {
-                        ServerCollection.Items = servers;
-                        InterfaceCollection.Items = interfaces;
-                        TypeLibraryCollection.Items = typeLibraries;
+                        ServerCollection.Items = new ObservableCollection<Server>(servers);
+                        InterfaceCollection.Items = new ObservableCollection<Interface>(interfaces);
+                        TypeLibraryCollection.Items = new ObservableCollection<TypeLibrary>(typeLibraries);
 
                         if (Interlocked.Decrement(ref numberOfLoadingThreads) == 0)
                             IsLoading = false;
@@ -78,6 +56,21 @@ namespace COMRegistryBrowser
                 });
         }
 
+        public void RemoveEntries(HashSet<RegistryEntry> itemsToRemove)
+        {
+            using (var classesRootKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, registryView))
+            {
+                foreach (var item in itemsToRemove)
+                {
+                    item.Remove(classesRootKey);
+
+                    if (!MasterCollections.Any(collection => collection.Remove(item)))
+                    {
+                        Trace.Fail("Removing an item that was not part of any master collection.");
+                    }
+                }
+            }
+        }
 
         public MasterServerCollection ServerCollection
         {
@@ -144,6 +137,18 @@ namespace COMRegistryBrowser
             }
         }
 
+
+        private IEnumerable<IItemsCollection> MasterCollections
+        {
+            get
+            {
+                yield return ServerCollection;
+                yield return InterfaceCollection;
+                yield return TypeLibraryCollection;
+            }
+        }
+
+
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
@@ -154,7 +159,5 @@ namespace COMRegistryBrowser
         }
 
         #endregion
-
-        public object Dictionary { get; set; }
     }
 }

@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Win32;
 
 namespace COMRegistryBrowser
 {
-    internal class RegistryEntry
+    internal abstract class RegistryEntry
     {
         public RegistryEntry(string guid, string name)
         {
             this.Guid = guid;
             this.Name = name;
         }
-
 
         public RegistryEntry(string guid)
             : this(guid, string.Empty)
@@ -35,6 +35,19 @@ namespace COMRegistryBrowser
         {
             get;
             protected set;
+        }
+
+        protected abstract string RootKeyName
+        {
+            get;
+        }
+
+        public void Remove(RegistryKey classesRootKey)
+        {
+            using (var key = classesRootKey.OpenSubKey(RootKeyName, true))
+            {
+                key.DeleteSubKeyTree(Guid);
+            }
         }
 
         public override string ToString()
@@ -72,7 +85,8 @@ namespace COMRegistryBrowser
             if (object.ReferenceEquals(right, null))
                 return false;
 
-            return string.Equals(left.Guid, right.Guid, StringComparison.OrdinalIgnoreCase);
+            return left.GetType().Equals(right.GetType()) 
+                && string.Equals(left.Guid, right.Guid, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
