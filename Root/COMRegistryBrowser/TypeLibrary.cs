@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Win32;
 
 namespace COMRegistryBrowser
 {
     internal class TypeLibrary : RegistryEntry, IEquatable<TypeLibrary>
     {
+        private const string rootKeyName = "TypeLib";
+
         private string version;
         private string fullPath;
         private string fileName;
@@ -30,6 +33,19 @@ namespace COMRegistryBrowser
                     this.fileName = Path.GetFileName(fullPath);
                     Exists = File.Exists(fullPath);
                 }
+            }
+        }
+
+        internal static TypeLibrary[] GetTypeLibrarys(RegistryKey classesRootKey)
+        {
+            using (var typeLibKey = classesRootKey.OpenSubKey(rootKeyName))
+            {
+                System.Guid tempGuid;
+
+                return typeLibKey.GetSubKeyNames()
+                    .Where(guid => System.Guid.TryParse(guid, out tempGuid))
+                    .SelectMany(guid => TypeLibrary.GetTypeLibrarys(typeLibKey, guid))
+                    .ToArray();
             }
         }
 
@@ -65,6 +81,14 @@ namespace COMRegistryBrowser
                         }
                     }
                 }
+            }
+        }
+
+        protected override string RootKeyName
+        {
+            get
+            {
+                return rootKeyName;
             }
         }
 

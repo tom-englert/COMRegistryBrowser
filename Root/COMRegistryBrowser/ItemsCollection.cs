@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace COMRegistryBrowser
 {
-    internal abstract class ItemsCollection<T> : DependencyObject where T : RegistryEntry
+    internal abstract class ItemsCollection<T> : DependencyObject, IItemsCollection where T : RegistryEntry
     {
         private readonly CollectionViewSource itemsViewSource = new CollectionViewSource();
         private readonly Browser browser;
@@ -24,26 +24,6 @@ namespace COMRegistryBrowser
             BindingOperations.SetBinding(itemsViewSource, CollectionViewSource.SourceProperty, new Binding("Items") { Source = this, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(this, ItemsViewProperty, new Binding() { Source = itemsViewSource, Mode = BindingMode.OneWay });
 
-        }
-
-        public T CurrentItem
-        {
-            get { return (T)GetValue(CurrentItemProperty); }
-            set { SetValue(CurrentItemProperty, value); }
-        }
-        /// <summary>
-        /// Identifies the CurrentItem dependency property
-        /// </summary>
-        public static readonly DependencyProperty CurrentItemProperty =
-            DependencyProperty.Register("CurrentItem", typeof(T), typeof(ItemsCollection<T>), new UIPropertyMetadata(new PropertyChangedCallback((sender, e) => ((ItemsCollection<T>)sender).CurrentItemChanged((T)e.OldValue, (T)e.NewValue))));
-
-        private void CurrentItemChanged(T oldValue, T newValue)
-        {
-            OnCurrentItemChanged(oldValue, newValue);
-        }
-
-        protected virtual void OnCurrentItemChanged(T oldValue, T newValue)
-        {
         }
 
         public IList<T> Items
@@ -66,26 +46,14 @@ namespace COMRegistryBrowser
         /// Identifies the ItemsView dependency property
         /// </summary>
         public static readonly DependencyProperty ItemsViewProperty =
-            DependencyProperty.Register("ItemsView", typeof(ICollectionView), typeof(ItemsCollection<T>), new UIPropertyMetadata(new PropertyChangedCallback((sender, e) => ((ItemsCollection<T>)sender).ItemsViewChanged((ICollectionView)e.OldValue, (ICollectionView)e.NewValue))));
+            DependencyProperty.Register("ItemsView", typeof(ICollectionView), typeof(ItemsCollection<T>), new UIPropertyMetadata((sender, e) => ((ItemsCollection<T>)sender).ItemsViewChanged((ICollectionView)e.NewValue)));
 
-        private void ItemsViewChanged(ICollectionView oldValue, ICollectionView newValue)
+        private void ItemsViewChanged(ICollectionView newValue)
         {
-            if (oldValue != null)
-            {
-                oldValue.CurrentChanged -= ItemsView_CurrentChanged;
-            }
-
             if (newValue != null)
             {
                 newValue.Filter = ActiveFilter;
-                newValue.CurrentChanged += ItemsView_CurrentChanged;
-                newValue.MoveCurrentTo(CurrentItem);
             }
-        }
-
-        private void ItemsView_CurrentChanged(object sender, EventArgs e)
-        {
-            CurrentItem = (T)ItemsView.CurrentItem;
         }
 
         private Predicate<object> ActiveFilter
@@ -119,8 +87,22 @@ namespace COMRegistryBrowser
 
         public IList SelectedItems
         {
-            get;
-            set;
+            get { return (IList)GetValue(SelectedItemsProperty); }
+            set { SetValue(SelectedItemsProperty, value); }
+        }
+        /// <summary>
+        /// Identifies the SelectedItems dependency property
+        /// </summary>
+        public static readonly DependencyProperty SelectedItemsProperty =
+            DependencyProperty.Register("SelectedItems", typeof(IList), typeof(ItemsCollection<T>), new UIPropertyMetadata(null, new PropertyChangedCallback((sender, e) => ((ItemsCollection<T>)sender).SelectedItems_Changed((IList)e.NewValue))));
+
+        private void SelectedItems_Changed(IList newValue)
+        {
+            OnSelectedItemsChanged(newValue.Cast<T>());
+        }
+
+        protected virtual void OnSelectedItemsChanged(IEnumerable<T> newValue)
+        {
         }
 
         public ICommand UnregisterCommand
@@ -161,21 +143,30 @@ namespace COMRegistryBrowser
         private void UnregisterSelected()
         {
             var selectedItems = SelectedItems.Cast<T>();
-            var itemsToRemove = new HashSet<RegistryEntry>(selectedItems.Cast<RegistryEntry>());
+            var itemsToRemove = new HashSet<RegistryEntry>(selectedItems);
 
             foreach (var item in selectedItems)
             {
                 GetDependencies(item, itemsToRemove);
             }
 
-            var itemsToRemoveText = string.Join("\n", itemsToRemove.Select(item => item.ToString()));
+            var dialog = new UnregisterDialog() 
+            { 
+                Items = itemsToRemove.OrderBy(item => item.ToString()).ToArray(),
+            };
 
-            MessageBox.Show("Do you want to remove this entries?\n\n" + itemsToRemoveText);
+            if ((bool)dialog.ShowDialog())
+            {
+                Browser.RemoveEntries(itemsToRemove);
+            }
         }
 
         private static bool AreRelated(Server server, Interface intf)
         {
             if ((server == null) || (intf == null))
+                return false;
+
+            if (string.IsNullOrEmpty(server.Guid))
                 return false;
 
             return string.Equals(intf.ProxyStub, server.Guid, StringComparison.OrdinalIgnoreCase);
@@ -186,12 +177,18 @@ namespace COMRegistryBrowser
             if ((typeLibrary == null) || (server == null))
                 return false;
 
+            if (string.IsNullOrEmpty(server.FullPath))
+                return false;
+
             return string.Equals(typeLibrary.FullPath, server.FullPath, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool AreRelated(TypeLibrary typeLibrary, Interface intf)
         {
             if ((intf == null) || (typeLibrary == null))
+                return false;
+
+            if (string.IsNullOrEmpty(typeLibrary.Guid))
                 return false;
 
             return string.Equals(typeLibrary.Guid, intf.TypeLibrary, StringComparison.OrdinalIgnoreCase)
@@ -245,5 +242,19 @@ namespace COMRegistryBrowser
                 return AreRelated(typeLibrary, intf);
             };
         }
+
+        #region IItemsCollection Members
+
+        bool IItemsCollection.Remove(RegistryEntry item)
+        {
+            var i = item as T;
+
+            if (i == null)
+                return false;
+
+            return Items.Remove(i);
+        }
+
+        #endregion
     }
 }

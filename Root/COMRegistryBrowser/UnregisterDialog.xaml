@@ -1,0 +1,36 @@
+﻿<Window x:Class="COMRegistryBrowser.UnregisterDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="ToolWindow" ShowInTaskbar="False" 
+        Title="Unregister" Height="300" Width="600" MinHeight="150"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
+        >
+  <DockPanel Margin="15">
+    <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Text="Confirm to remove these entries from the registry:" />
+    <Decorator Height="15" DockPanel.Dock="Top"/>
+    <Grid  DockPanel.Dock="Bottom" Grid.IsSharedSizeScope="True">
+      <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="A"/>
+          </Grid.ColumnDefinitions>
+          <Button Content="OK" Padding="5,1" IsDefault="True" Click="OK_Click"/>
+        </Grid>
+        <Decorator Width="10"/>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="A"/>
+          </Grid.ColumnDefinitions>
+          <Button Content="Cancel" Padding="5,1" IsCancel="True"/>
+        </Grid>
+
+      </StackPanel>
+    </Grid>
+    <Decorator Height="15" DockPanel.Dock="Bottom"/>
+    <Border BorderBrush="#70000000" BorderThickness="1" Background="#10000000">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl IsEnabled="False" ItemsSource="{Binding Items}" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+      </ScrollViewer>
+    </Border>
+  </DockPanel>
+</Window>

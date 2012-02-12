@@ -117,7 +117,8 @@ namespace COMRegistryBrowser
                 if (selector != null)
                 {
                     selectionBindingIsUpdatingSource = true;
-                    selector.SetValue(SelectionBindingProperty, selector.SelectedItems);
+                    IList selected = selector.SelectedItems;
+                    selector.SetValue(SelectionBindingProperty, ArrayList.Adapter(selected));
                     selectionBindingIsUpdatingSource = false;
                 }
             }

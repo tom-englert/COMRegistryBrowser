@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Data;
+using System.Collections;
 
 namespace COMRegistryBrowser
 {
     internal class MasterServerCollection : ServerCollection
     {
         private Predicate<Interface> interfaceFilterPredicate = (_) => false;
-        private Predicate<TypeLibrary> typeLibraryPredicate = (_) => false;
+        private Predicate<TypeLibrary> typeLibraryFilterPredicate = (_) => false;
 
         public MasterServerCollection(Browser browser)
             : base(browser)
@@ -29,7 +30,7 @@ namespace COMRegistryBrowser
 
         private bool TypeLibraryFilter(TypeLibrary typeLibrary)
         {
-            return typeLibraryPredicate(typeLibrary);
+            return typeLibraryFilterPredicate(typeLibrary);
         }
 
         public InterfaceCollection InterfaceCollection
@@ -44,12 +45,12 @@ namespace COMRegistryBrowser
             private set;
         }
 
-        protected override void OnCurrentItemChanged(Server oldValue, Server newValue)
+        protected override void OnSelectedItemsChanged(IEnumerable<Server> newValue)
         {
-            base.OnCurrentItemChanged(oldValue, newValue);
+            base.OnSelectedItemsChanged(newValue);
 
-            interfaceFilterPredicate = RelatedInterfacePredicate(newValue);
-            typeLibraryPredicate = RelatedTypeLibraryPredicate(newValue);
+            interfaceFilterPredicate = (intf) => newValue.Select(item => RelatedInterfacePredicate(item)).Any(pred => pred(intf));
+            typeLibraryFilterPredicate = (typeLibrary) => newValue.Select(item => RelatedTypeLibraryPredicate(item)).Any(pred => pred(typeLibrary));
 
             InterfaceCollection.Refresh();
             TypeLibraryCollection.Refresh();
