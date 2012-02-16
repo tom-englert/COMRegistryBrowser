@@ -157,5 +157,10 @@ namespace COMRegistryBrowser
                 targetGrid.SelectedItem = currentItem;
             });
         }
+
+        private void about_Click(object sender, RoutedEventArgs e)
+        {
+            new AboutDialog() { Owner = this }.ShowDialog();
+        }
     }
 }
