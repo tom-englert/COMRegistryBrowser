@@ -40,7 +40,7 @@
 
   <Grid>
     <Grid>
-      <TabControl>
+      <TabControl Margin="0,5,0,0">
         <TabItem Header="Servers">
           <Grid DataContext="{Binding Path=ServerCollection}">
             <Grid.ColumnDefinitions>
@@ -137,8 +137,10 @@
       </TextBlock.Style>
       </TextBlock>
     </Grid>
-    <Grid VerticalAlignment="Top" HorizontalAlignment="Right">
+    <Grid VerticalAlignment="Top" HorizontalAlignment="Right" Margin="2">
       <StackPanel Orientation="Horizontal">
+        <Button Content="About..." Padding="3,0" Click="about_Click"/>
+        <Decorator Width="3"/>
         <ComboBox SelectedItem="{Binding RegistryView, Mode=TwoWay}">
           <x:StaticExtension Member="win32:RegistryView.Registry32"/>
           <x:StaticExtension Member="win32:RegistryView.Registry64"/>
