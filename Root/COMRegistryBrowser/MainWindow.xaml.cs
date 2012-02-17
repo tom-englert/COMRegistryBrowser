@@ -1,21 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.ComponentModel;
-using System.Reflection;
-using System.Reactive.Linq;
-using System.Reactive;
-using System.Windows.Controls.Primitives;
 using DataGridExtensions;
 
 namespace COMRegistryBrowser
@@ -126,15 +115,15 @@ namespace COMRegistryBrowser
 
             DataGrid targetGrid;
 
-            if (sourceCollection is Interface[])
+            if (sourceCollection is IEnumerable<Interface>)
             {
                 targetGrid = interfacesGrid;
             }
-            else if (sourceCollection is Server[])
+            else if (sourceCollection is IEnumerable<Server>)
             {
                 targetGrid = serversGrid;
             }
-            else if (sourceCollection is TypeLibrary[])
+            else if (sourceCollection is IEnumerable<TypeLibrary>)
             {
                 targetGrid = typeLibsGrid;
             }
