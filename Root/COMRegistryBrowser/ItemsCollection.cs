@@ -215,6 +215,11 @@ namespace COMRegistryBrowser
         {
             return delegate(Server server)
             {
+                // PSOAInterface: The system proxy, does type library marshalling for most interfaces.
+                // This is an implict dependency, don't list it in the explict dependencies.
+                if (string.Equals(server.Guid, @"{00020424-0000-0000-C000-000000000046}", StringComparison.OrdinalIgnoreCase))
+                    return false;
+
                 return AreRelated(server, intf);
             };
         }
