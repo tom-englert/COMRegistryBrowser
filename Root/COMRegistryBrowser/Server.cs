@@ -1,18 +1,21 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Microsoft.Win32;
-
-namespace COMRegistryBrowser
+﻿namespace COMRegistryBrowser
 {
+    using System;
+    using System.IO;
+    using System.Linq;
+
+    using Microsoft.Win32;
+
     internal class Server : RegistryEntry, IEquatable<Server>
     {
-        private const string rootKeyName = "CLSID";
+        private const string _rootKeyName = "CLSID";
 
-        private string fullPath;
-        private string fileName;
-        private string assembly;
-        private string threadingModel;
+        private readonly string _fullPath;
+        private readonly string _fileName;
+        private readonly string _assembly;
+        private readonly string _threadingModel;
+        private readonly string _progId;
+        private readonly string _versionIndependentProgId;
 
         public Server(RegistryKey parentKey, string guid)
             : base(guid)
@@ -20,34 +23,36 @@ namespace COMRegistryBrowser
             using (var serverKey = parentKey.OpenSubKey(guid))
             {
                 Name = serverKey.GetDefaultValue();
-                fullPath = serverKey.GetDefaultValue(@"InprocServer32") ?? serverKey.GetDefaultValue(@"LocalServer32");
-                assembly = serverKey.GetSubKeyValue(@"InprocServer32", @"Assembly");
-                threadingModel = serverKey.GetSubKeyValue(@"InprocServer32", @"ThreadingModel");
+                _fullPath = serverKey.GetDefaultValue(@"InprocServer32") ?? serverKey.GetDefaultValue(@"LocalServer32");
+                _assembly = serverKey.GetSubKeyValue(@"InprocServer32", @"Assembly");
+                _threadingModel = serverKey.GetSubKeyValue(@"InprocServer32", @"ThreadingModel");
+                _progId = serverKey.GetDefaultValue(@"ProgID");
+                _versionIndependentProgId = serverKey.GetDefaultValue(@"VersionIndependentProgID");
             }
 
-            if (fullPath != null)
+            if (_fullPath != null)
             {
-                fullPath = fullPath.GetFullFilePath();
-                Exists = File.Exists(this.fullPath);
+                _fullPath = _fullPath.GetFullFilePath();
+                Exists = File.Exists(_fullPath);
 
-                if (!Exists && fullPath.Contains(' '))
+                if (!Exists && _fullPath.Contains(' '))
                 {
-                    var temp = fullPath.Split(' ').First().GetFullFilePath();
+                    var temp = _fullPath.Split(' ').First().GetFullFilePath();
 
                     if (File.Exists(temp))
                     {
-                        fullPath = temp;
+                        _fullPath = temp;
                         Exists = true;
                     }
                 }
 
-                this.fileName = Path.GetFileName(fullPath);
+                _fileName = Path.GetFileName(_fullPath);
             }
-            else if (assembly != null)
+            else if (_assembly != null)
             {
                 try
                 {
-                    System.Reflection.Assembly.ReflectionOnlyLoad(assembly);
+                    System.Reflection.Assembly.ReflectionOnlyLoad(_assembly);
                     Exists = true;
                 }
                 catch
@@ -58,9 +63,9 @@ namespace COMRegistryBrowser
 
         internal static Server[] GetServers(RegistryKey classesRootKey)
         {
-            using (var clsidKey = classesRootKey.OpenSubKey(rootKeyName))
+            using (var clsidKey = classesRootKey.OpenSubKey(_rootKeyName))
             {
-                System.Guid tempGuid;
+                Guid tempGuid;
 
                 return clsidKey.GetSubKeyNames()
                     .Where(guid => System.Guid.TryParse(guid, out tempGuid))
@@ -71,30 +76,40 @@ namespace COMRegistryBrowser
 
         protected override string RootKeyName
         {
-            get
-            {
-                return rootKeyName;
-            }
+            get { return _rootKeyName; }
         }
 
         public string ThreadingModel
         {
-            get { return this.threadingModel; }
+            get { return _threadingModel; }
+        }
+
+        public string ProgId
+        {
+            get { return _progId; }
         }
 
         public string FullPath
         {
-            get { return this.fullPath; }
+            get { return _fullPath; }
         }
 
         public string FileName
         {
-            get { return this.fileName; }
+            get { return _fileName; }
         }
 
         public string Assembly
         {
-            get { return assembly; }
+            get { return _assembly; }
+        }
+
+        public string VersionIndependentProgId
+        {
+            get
+            {
+                return _versionIndependentProgId;
+            }
         }
 
         #region IEquatable implementation
